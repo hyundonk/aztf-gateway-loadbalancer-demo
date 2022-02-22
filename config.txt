@@ -1,0 +1,121 @@
+config system global
+  set hostname "fgt1Vm"
+end
+
+config firewall address
+  edit AzureProbeSourceIP
+    set allow-routing enable
+    set subnet "168.63.129.16/32"
+    set comment Azure_PIP_used_for_internal_platform_resources
+  next
+end
+
+config system interface
+  edit port1
+    set defaultgw disable
+    set description Provider
+    set mtu-override enable
+    set mtu 1570
+    set allowaccess probe-response
+  next
+  edit port2
+    set defaultgw disable
+    set allowaccess ping https ssh fgfm probe-response
+    set description Management
+  next
+end
+
+
+config router static
+  edit 1
+    set gateway "172.16.10.129"
+    set device port2
+  next
+  edit 2
+    set dstaddr AzureProbeSourceIP
+    set device port1
+    set gateway "172.16.10.1"
+  next
+end
+
+config system probe-response
+  set http-probe-value OK
+  set mode http-probe
+end
+
+config system vxlan
+  edit extvxlan
+    set interface port1
+    set vni 801
+    set dstport 2001
+    set remote-ip "172.16.10.4"
+  next
+  edit intvxlan
+    set interface port1
+    set vni 800
+    set dstport 2000
+    set remote-ip "172.16.10.4"
+  next
+end
+
+config system virtual-wire-pair
+  edit vxlanvwpair
+    set member extvxlan intvxlan
+  next
+end
+
+config web-proxy profile 
+  edit "XFF"
+    set header-x-forwarded-for add
+  next
+end
+
+config firewall ssl-ssh-profile
+  edit "offload"
+    set server-cert-mode re-sign
+    set use-ssl-server enable
+  next
+end
+
+config firewall ssl-server
+  edit "20.194.109.84"
+    set ip 20.194.109.84
+    set ssl-mode half
+    set ssl-cert "Fortinet_SSL"
+    set add-header-x-forwarded-proto enable
+  next
+end
+
+config firewall policy
+    edit 1
+        set name "inbound_1"
+        set srcintf "extvxlan"
+        set dstintf "intvxlan"
+        set action accept
+        set srcaddr "all"
+        set dstaddr "all"
+        set schedule "always"
+        set service "ALL"
+        set utm-status enable
+        set inspection-mode proxy
+        set webproxy-profile "XFF"
+        set ssl-ssh-profile "offload"
+        set ips-sensor "default"
+        set logtraffic all
+    next
+    edit 2
+        set name "outbound_1"
+        set srcintf "intvxlan"
+        set dstintf "extvxlan"
+        set action accept
+        set srcaddr "all"
+        set dstaddr "all"
+        set schedule "always"
+        set service "ALL"
+        set utm-status enable
+        set ssl-ssh-profile "certificate-inspection"
+        set ips-sensor "default"
+        set logtraffic all
+    next
+end
+
