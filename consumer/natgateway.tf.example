@@ -1,0 +1,27 @@
+module "pip_natgateway" {
+  source                            = "git://github.com/hyundonk/aztf-module-pip.git"
+
+  prefix                            = "demo"
+  services                          = var.pip_natgateway
+
+  location                          = azurerm_resource_group.example.location
+  rg                                = azurerm_resource_group.example.name
+
+  tags                              = {}
+}
+
+resource "azurerm_nat_gateway" "example" {
+  name                    = "nat-Gateway"
+  location                = azurerm_resource_group.example.location
+  resource_group_name     = azurerm_resource_group.example.name
+  public_ip_address_ids   = [module.pip_natgateway.public_ip.0.id]
+  public_ip_prefix_ids    = null
+  sku_name                = "Standard"
+  idle_timeout_in_minutes = 10
+}
+
+resource "azurerm_subnet_nat_gateway_association" "example" {
+  subnet_id       = module.virtual_network.subnet_ids_map["subnet-frontend"]
+  nat_gateway_id = azurerm_nat_gateway.example.id
+}
+

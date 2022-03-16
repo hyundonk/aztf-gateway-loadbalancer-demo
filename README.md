@@ -38,4 +38,25 @@ Then the following resources will be deployed.
  - 2 Fortigate VMs with 2 network interfaces each. (One interface for tunneling with client side azure load balancer and the other for management web ui access.)
  - 2 Public IP addresses for Fortigate Management UI access
 
+After deployment, perform following tasks.
+
+1) Login to each fortigate management console (https) and complete initial provisioning on each instance. 
+2) On Gateway Load Balancer, add Load Balancing rule with default values. Make sure that backend health check with fortigate instances is successful.
+
+3) Deploy consumer side of resources
+
+```
+# Go to consumer directory which contains terraform files for consumer side of resources.
+$ cd consumer
+
+# Run terraform init
+$ terraform init
+
+# Run terraform apply
+# terraform apply
+
+```
+
+After deploying consumer side of resources, connect consumer side of load balancer's frontend IP to gateway load balancer. 
+
 

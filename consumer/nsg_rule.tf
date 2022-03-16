@@ -6,7 +6,7 @@ module "nsg_rule" {
   location                = azurerm_resource_group.example.location
   tags                    = {}
 
-  depends_on  = [module.provider_network]
+  depends_on  = [module.virtual_network]
 }
 
 
