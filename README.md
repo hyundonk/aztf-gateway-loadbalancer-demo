@@ -17,6 +17,18 @@ Fortigate VMs are configured to perform the following services.
  - SSL offload 
  - Add X-Forwarded-Proto header
 
+### Pre-requisite
+```
+# Register EnableHighAvailabilityMode feature which is required to deploy NVAs with Gateway Load Balancer
+az feature register --name EnableHighAvailabilityMode --namespace Microsoft.Network
+az provider register -n Microsoft.Network
+
+# Run below before deploying fortigate VMs with PAYG license. Make sure that your subscription offer supports using PAYG license.
+$ az vm image accept-terms --publisher fortinet --offer fortinet_fortigate-vm_v5 --plan fortinet_fg-vm_payg_20190624
+```
+
+
+### How to deploy
 
 You can deploy demo environment using terraform as follow
 ```
@@ -24,6 +36,8 @@ You can deploy demo environment using terraform as follow
 
 # Then login using Azure CLI
 $ az login 
+
+
 
 # Run terraform init
 $ terraform init
